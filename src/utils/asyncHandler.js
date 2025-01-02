@@ -4,6 +4,7 @@ export const asyncHandler = (requestHandler) =>{
     }
 }
 
+
 /*
 const asyncHandler = (fn) => async (req,res,next) => {
    try {

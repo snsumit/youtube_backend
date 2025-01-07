@@ -16,4 +16,6 @@ router.route('/register').post(upload.fields([
 ]),userController.registerUser)
 
 
+router.route('/login').post(userController.loginUser)
+
 export default router

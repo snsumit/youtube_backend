@@ -19,5 +19,6 @@ router.route('/register').post(upload.fields([
 
 router.route('/login').post(userController.loginUser)
 router.route('/logout').post(verifyJWT,userController.logoutUser)
+router.route('/refresh-token').post(userController.refreshAccessToken)
 
 export default router

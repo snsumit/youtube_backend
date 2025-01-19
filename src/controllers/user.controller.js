@@ -191,38 +191,38 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
      }
 
      try {
-     // decode the token 
+          // decode the token 
           const decodedToken = jwt.verify(
                incomingRefreshToken,
                process.env.REFRESH_TOKEN_SECRET,
           )
-     //  get the user with the help of id in the refresh or decoded token
+          //  get the user with the help of id in the refresh or decoded token
           const user = await User.findById(decodedToken?._id);
 
           if (!user) {
                throw new ApiError(401, "Invalid refresh Token");
           }
 
-     // check for the token are same or not  
+          // check for the token are same or not  
           if (incomingRefreshToken !== user?.refreshToken) {
                throw new ApiError(401, "Refresh Token is used or expired")
           }
 
-     // genrate new accessToken and refreshToken for the user 
+          // genrate new accessToken and refreshToken for the user 
           const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
-          
-     
+
+
           const options = {
                httpOnly: true,
                secure: true,
           }
- 
+
           return res
                .status(200)
                .cookie("accessToken", accessToken, options)
                .cookie("refreshToken", refreshToken, options)
                .json(
-                    new ApiResponse(200, { accessToken,refreshToken }, "Access Token Refreshed")
+                    new ApiResponse(200, { accessToken, refreshToken }, "Access Token Refreshed")
                )
 
      } catch (error) {
@@ -232,7 +232,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-    
+
      // get the old and new password from the user
      const { oldPassword, newPassword } = req.body;
 
@@ -240,7 +240,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
      if (!oldPassword || !newPassword) {
           throw new ApiError(400, "Old password and new password are required");
      }
- 
+
      // find the user in the database to change the password
      const user = await User.findById(req.user?._id);
 
@@ -258,23 +258,144 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
      // change The password
      user.password = newPassword;
      // save the user with the new password
-     await user.save({validateBeforeSave: false});
+     await user.save({ validateBeforeSave: false });
 
      return res
-     .status(200)
-     .json(
-          new ApiResponse(200, {}, "Password changed successfully")
-     );
+          .status(200)
+          .json(
+               new ApiResponse(200, {}, "Password changed successfully")
+          );
 });
- 
-const getCurrentUser = asyncHandler(async (req,res)=>{
+
+const getCurrentUser = asyncHandler(async (req, res) => {
      return res.status(200).json(
-          new ApiResponse(200,{user:req.user},"Successfully get the user details")
+          new ApiResponse(200, { user: req.user }, "Successfully get the user details")
      )
 })
 
 
-export default { registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword , getCurrentUser }
+
+const updateUserDetails = asyncHandler(async (req, res) => {
+     
+     const { fullName , email } = req.body;
+
+     if (!fullName || !email) {
+          throw new ApiError(400, "All fields are required");
+
+     }
+
+     //  update the user detail and get the new updated data
+     const user = User.findByIdAndUpdate(
+          req.user?._id,
+          {
+               $set: {
+                    fullName,
+                    email,
+               }
+          },
+          { new: true }  // the updated data 
+
+     ).select("-password")
+
+     if (!user) {
+          throw new ApiError("400", "Unauthorized user")
+     }
+
+     return res.status(200).json(
+          new ApiResponse(200, user, "Account Details updated Successfully")
+     )
+
+})
+
+const updateUserAvatarImage = asyncHandler(async (req, res) => {
+
+     const avatarLocalFilePath = req.file?.path;
+
+     if (!avatarLocalFilePath) {
+          throw new ApiError(400, "Avatar file is required")
+     }
+
+     // Find the user in the database
+     const user = await User.findById(req.user?._id);
+
+     if (!user) {
+          throw new ApiError(404, "User not found");
+     }
+
+     // Delete the existing avatar from Cloudinary
+     const publicId = user.avatar.split('/').pop().split('.')[0];
+     await cloudinary.uploader.destroy(publicId);
+
+     // Upload the new avatar to Cloudinary
+     const avatar = await uploadOnCloudinary(avatarLocalFilePath);
+
+     if (!avatar) {
+          throw new ApiError(400, "Failed to upload new avatar");
+     }
+
+     // Update the user's avatar in the database
+     user.avatar = avatar.url;
+     await user.save({ validateBeforeSave: false });
+
+     return res.status(200).json(
+          new ApiResponse(200, { avatar: user.avatar }, "Avatar updated successfully")
+     );
+
+
+})
+
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+
+     const coverImageLocalFilePath = req.file?.path;
+
+     if (!coverImageLocalFilePath) {
+          throw new ApiError(400, "Cover image file is required")
+     }
+
+     // Find the user in the database
+     const user = await User.findById(req.user?._id);
+
+     if (!user) {
+          throw new ApiError(404, "User not found");
+     }
+
+     // Delete the existing cover image from Cloudinary if it exists
+     if (user.coverImage) {
+          const publicId = user.coverImage.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(publicId);
+     }
+
+     // Upload the new cover image to Cloudinary
+     const coverImage = await uploadOnCloudinary(coverImageLocalFilePath);
+
+     if (!coverImage) {
+          throw new ApiError(400, "Failed to upload new cover image");
+     }
+
+     // Update the user's cover image in the database
+     user.coverImage = coverImage.url;
+     await user.save({ validateBeforeSave: false });
+
+     return res.status(200).json(
+          new ApiResponse(200, { coverImage: user.coverImage }, "Cover image updated successfully")
+     );
+
+})
+
+
+
+export default {
+     registerUser,
+     loginUser,
+     logoutUser,
+     refreshAccessToken,
+     changeCurrentPassword,
+     getCurrentUser,
+     updateUserDetails,
+     updateUserAvatarImage,
+     updateUserCoverImage,
+}
 
 
 

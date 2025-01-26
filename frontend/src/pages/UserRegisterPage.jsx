@@ -1,8 +1,8 @@
 import React,{useState,useRef} from 'react'
 import { Link } from 'react-router-dom';
-
-
-
+import axios from "axios"
+import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 const UserRegisterPage = () => {
 
@@ -14,32 +14,50 @@ const UserRegisterPage = () => {
   const [cover, setCover] = useState(null);
   const avatarfileInputRef = useRef(null)
   const coverfileInputRef = useRef(null)
+  const navigate = useNavigate()
   const handleFileChange = (e,type) =>{
     const file = e.target.files[0];
     if(file){
-      const ImageUrl = URL.createObjectURL(file)
+    
       if(type === "avatar"){
-        setAvatar(ImageUrl)
+        setAvatar(file)
       }
       if(type === "cover"){
-        setCover(ImageUrl)
+        setCover(file)
       }
     }
 
 }
 
-  const handleFormSubmit = (e) =>{
+  const handleFormSubmit = async (e) =>{
      e.preventDefault();
-     const user ={
-       fullName,
-       username,
-       email,
-       password,
-       avatar,
-       cover,
-     }
+    const formData = new FormData();
+    formData.append("fullName",fullName);
+    formData.append("email",email);
+    formData.append("username",username);
+    formData.append("password",password);
+    formData.append("avatar",avatar);
+    formData.append("coverImage",cover);
 
-     console.log(user)
+
+    try{
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`,formData,{
+        headers:{
+          "Content-Type":"multipart/form-data"
+        }
+      })
+
+      if(response.status ===201){
+         toast.success('SuccessFully Registerd');
+         setTimeout(() => navigate('/login'), 2000); // Delay navigation
+      }
+
+      
+    }catch(error){  
+      console.log(error)
+      toast.error('Something went wrong');
+    }
+    
     setFullName("");
     setPassword("");
     setEmail("");
@@ -57,7 +75,10 @@ const UserRegisterPage = () => {
 
     
  return (
+   <>
+   
     <div className="min-h-screen flex items-center justify-center ">
+      <Toaster position='top-right' />   
       <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform transition-all hover:scale-105">
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">PlayCraft</h2>
         <form className="space-y-2" onSubmit={handleFormSubmit}>
@@ -166,7 +187,11 @@ const UserRegisterPage = () => {
         </p>
       </div>
     </div>
+    </>
+
   );
 }
 
 export default UserRegisterPage
+
+

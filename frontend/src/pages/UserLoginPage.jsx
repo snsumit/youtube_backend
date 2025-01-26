@@ -1,11 +1,18 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
+
+
 
 const UserLoginPage = () => {
     const [formData,setFormData]=useState({
       email:"",
       password:""
     })
+
+    const navigate = useNavigate()
 
     const handleChange = (e)=>{
      
@@ -19,11 +26,20 @@ const UserLoginPage = () => {
 
     }
 
-   const handleFormSubmit = (e) =>{
+   const handleFormSubmit = async (e) =>{
       e.preventDefault()
-    
-      console.log(formData)
-
+     
+      try {
+         const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,formData);
+         if(response.status === 200){
+          toast.success("Login SuccessFully")
+          setTimeout(() => navigate('/home'), 1000); 
+         }
+      } catch (error) {
+        console.log(error)
+      }
+      
+ 
       setFormData({
         email:"",
         password:""
@@ -33,6 +49,7 @@ const UserLoginPage = () => {
     return (
 
     <div className="min-h-screen bg-white p-8 rounded-2xl w-full max-w-md">
+      <Toaster position='top-right' />
       <h2 className="text-2xl font-semibold mb-6  text-gray-800">PlayCraft</h2>
       <form className="space-y-6" onSubmit={handleFormSubmit} >
         <div>

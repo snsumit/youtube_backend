@@ -9,8 +9,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
      try {
           // find the user with the useId
           const user = await User.findById(userId)
-          const accessToken = user.generateAccessToken();
-          const refreshToken = user.generateRefreshToken();
+          const accessToken = await user.generateAccessToken();
+          const refreshToken = await user.generateRefreshToken();
 
           //   set the refreshToken to the user
           user.refreshToken = refreshToken;
@@ -18,6 +18,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
           // return the accessToken and refreshToken as a object
           return { accessToken, refreshToken }
      } catch (error) {
+          console.log(error)
           throw new ApiError(500, "Something went wrong while generating the access and refresh tokens")
      }
 }

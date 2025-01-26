@@ -32,7 +32,7 @@ const UserLoginPage = () => {
 
     return (
 
-    <div className="min-h-screen bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all hover:scale-105">
+    <div className="min-h-screen bg-white p-8 rounded-2xl w-full max-w-md">
       <h2 className="text-2xl font-semibold mb-6  text-gray-800">PlayCraft</h2>
       <form className="space-y-6" onSubmit={handleFormSubmit} >
         <div>

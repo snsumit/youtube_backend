@@ -142,9 +142,11 @@ const loginUser = asyncHandler(async (req, res) => {
 
      const options = {
           httpOnly: true,
-          secure: true,
-     }
-
+          secure: process.env.NODE_ENV === 'production', // Set secure attribute based on environment
+          sameSite: 'Strict', // Add sameSite attribute
+     };
+      
+     
      // return response with the cookies set to the user cookies
 
      return res
@@ -171,7 +173,7 @@ const logoutUser = asyncHandler(async (req, res) => {
      });
      const options = {
           httpOnly: true,
-          secure: true
+          
      }
 
      return res
@@ -215,8 +217,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
           const options = {
                httpOnly: true,
-               secure: true,
-          }
+               secure: process.env.NODE_ENV === 'production', // Set secure attribute based on environment
+               sameSite: 'Strict', // Add sameSite attribute
+          };
 
           return res
                .status(200)
@@ -397,10 +400,3 @@ export default {
      updateUserAvatarImage,
      updateUserCoverImage,
 }
-
-
-
-
-
-
-

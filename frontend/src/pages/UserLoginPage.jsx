@@ -7,46 +7,52 @@ import toast, { Toaster } from 'react-hot-toast';
 
 
 const UserLoginPage = () => {
-    const [formData,setFormData]=useState({
-      email:"",
-      password:""
-    })
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  })
 
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
-    const handleChange = (e)=>{
-     
-      const { name,value } = e.target;
+  const handleChange = (e) => {
 
-      setFormData((prev)=> ({
-      
-        ...prev,
-        [name]:value
-      }))
+    const { name, value } = e.target;
 
+    setFormData((prev) => ({
+
+      ...prev,
+      [name]: value
+    }))
+
+  }
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, formData);
+      if (response.status === 200) {
+        const { data } = response.data;
+       
+        const accessToken = data.accessToken;
+        localStorage.setItem("accessToken", accessToken);
+
+        toast.success("Login SuccessFully")
+        setTimeout(() => navigate('/home'), 1000);
+      }
+    } catch (error) {
+      toast.error("Something went wrong pls try again")
+      console.log(error)
     }
 
-   const handleFormSubmit = async (e) =>{
-      e.preventDefault()
-     
-      try {
-         const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,formData);
-         if(response.status === 200){
-          toast.success("Login SuccessFully")
-          setTimeout(() => navigate('/home'), 1000); 
-         }
-      } catch (error) {
-        console.log(error)
-      }
-      
- 
-      setFormData({
-        email:"",
-        password:""
-      })
-   }
 
-    return (
+    setFormData({
+      email: "",
+      password: ""
+    })
+  }
+
+  return (
 
     <div className="min-h-screen bg-white p-8 rounded-2xl w-full max-w-md">
       <Toaster position='top-right' />
@@ -59,7 +65,7 @@ const UserLoginPage = () => {
           <input
             value={formData.email}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-           
+
             name="email"
             type="text"
             onChange={handleChange}
@@ -67,7 +73,7 @@ const UserLoginPage = () => {
           />
         </div>
 
-       
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="password">
             Password
@@ -75,7 +81,7 @@ const UserLoginPage = () => {
           <input
 
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-           
+
             name="password"
             value={formData.password}
             type="text"
@@ -84,7 +90,7 @@ const UserLoginPage = () => {
           />
         </div>
 
-        
+
         <div>
           <button
             className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
@@ -95,9 +101,9 @@ const UserLoginPage = () => {
         </div>
       </form>
 
-      
 
-     
+
+
       <p className="mt-6 text-center text-sm text-gray-600">
         Don't have an account?{' '}
         <Link to="/register" className="font-semibold text-blue-600 hover:text-purple-500">
@@ -106,7 +112,7 @@ const UserLoginPage = () => {
       </p>
     </div>
 
-);
+  );
 }
 
 export default UserLoginPage

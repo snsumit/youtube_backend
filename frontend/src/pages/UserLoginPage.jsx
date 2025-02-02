@@ -4,8 +4,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
-
-
 const UserLoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -100,8 +98,6 @@ const UserLoginPage = () => {
           </button>
         </div>
       </form>
-
-
 
 
       <p className="mt-6 text-center text-sm text-gray-600">
